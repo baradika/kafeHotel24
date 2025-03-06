@@ -25,8 +25,10 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import javax.swing.table.DefaultTableModel;
-
-
+/**
+ *
+ * @author Sadindiiw!
+ */
 public class kasir extends javax.swing.JFrame {
 
     Double totalAmount=0.0;
@@ -49,6 +51,7 @@ public class kasir extends javax.swing.JFrame {
         showDataItem();
         idOrder();
         tanggalOrder();
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
     private void showDataItem(){
@@ -293,6 +296,14 @@ public class kasir extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         background.setBackground(new java.awt.Color(100, 70, 19));
 
@@ -561,6 +572,11 @@ public class kasir extends javax.swing.JFrame {
 
         btn_laporan.setFont(new java.awt.Font("Segoe UI Semibold", 1, 14)); // NOI18N
         btn_laporan.setText("Laporan");
+        btn_laporan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_laporanActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout transaksiLayout = new javax.swing.GroupLayout(transaksi);
         transaksi.setLayout(transaksiLayout);
@@ -834,6 +850,20 @@ public class kasir extends javax.swing.JFrame {
        }
        hitungTotal();
     }//GEN-LAST:event_tbl_checkoutMouseClicked
+
+    private void btn_laporanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_laporanActionPerformed
+       
+    }//GEN-LAST:event_btn_laporanActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        home.cashier formCashier = new home.cashier();
+        formCashier.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_formWindowClosing
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        
+    }//GEN-LAST:event_formWindowClosed
 
     /**
      * @param args the command line arguments

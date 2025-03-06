@@ -99,7 +99,7 @@ public class loginPage extends javax.swing.JFrame {
             }
         });
 
-        jPanel1.setBackground(new java.awt.Color(51, 51, 255));
+        jPanel1.setBackground(new java.awt.Color(99, 68, 18));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
@@ -156,7 +156,7 @@ public class loginPage extends javax.swing.JFrame {
                 .addComponent(show)
                 .addGap(13, 13, 13)
                 .addComponent(login, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 26, Short.MAX_VALUE))
+                .addGap(22, 22, 22))
         );
 
         pack();
@@ -190,24 +190,24 @@ public class loginPage extends javax.swing.JFrame {
         String password = pw.getText();  
 
         try {
-            // Query untuk mengambil data user berdasarkan username dan password
+            
             this.ps = kon.getCon().prepareStatement("SELECT * FROM user WHERE username=? AND password=?");
             this.ps.setString(1, username);
             this.ps.setString(2, password);
             this.rs = this.ps.executeQuery();
 
             if (this.rs.next()) {
-                String role = this.rs.getString("role"); // Ambil nilai role dari database
+                String role = this.rs.getString("role"); 
 
                 if ("kitchen".equalsIgnoreCase(role)) {
-                    kasir.barang kitchenPage = new kasir.barang();
+                    home.kitchen kitchenPage = new home.kitchen();
                     kitchenPage.setVisible(true);
                 } else {
-                    kasir.kasir cashierPage = new kasir.kasir();
+                    home.cashier cashierPage = new home.cashier();
                     cashierPage.setVisible(true);
                 }
 
-                this.dispose(); // Tutup form login setelah berhasil login
+                this.dispose();
             } else {
                 JOptionPane.showMessageDialog(null, "ID/Password Anda salah!");
             }
