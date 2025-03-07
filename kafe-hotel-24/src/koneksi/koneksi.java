@@ -18,7 +18,7 @@ public class koneksi {
             String dbUrl = "jdbc:mysql://localhost:3306/kasircafe?user=root&password=&serverTimezone=UTC";
 
             try {
-                Class.forName("com.mysql.cj.jdbc.Driver");
+                Class.forName("com.mysql.jdbc.Driver");
                 conn = DriverManager.getConnection(dbUrl);
             } catch (ClassNotFoundException e) {
                 System.out.println("Driver tidak ditemukan: " + e.getMessage());

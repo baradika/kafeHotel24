@@ -29,31 +29,42 @@ public class HargaJual extends javax.swing.JFrame {
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
-    private void showData(){
-        DefaultTableModel model = (DefaultTableModel)tbl_jual.getModel();
-        model.setRowCount(0);
-        try{
-            String sql = "SELECT * FROM harga";
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery(sql);
-            while (rs.next()){
-                String menu = rs.getString("menu");
-                String itm1 = rs.getString("item1");
-                String itm2 = rs.getString("item2");
-                String itm3 = rs.getString("item3");
-                String itm4 = rs.getString("item4");
-                String totalHarga = rs.getString("total_harga");
-                String hargaJual = rs.getString("harga_jual");
-                NumberFormat kursIndo = NumberFormat.getIntegerInstance(new Locale("id",
-                "ID"));
-                
-                Object[] Rowdata = {menu, itm1, itm2,itm3,itm4,kursIndo.format(totalHarga),kursIndo.format(hargaJual)};
-                model.addRow(Rowdata);
-            }
-        }catch (Exception e){
-            
+    private void showData() {
+    DefaultTableModel model = (DefaultTableModel) tbl_jual.getModel();
+    model.setRowCount(0); // Hapus semua data sebelum diisi ulang
+
+    try {
+        // Debugging: Pastikan koneksi tidak null
+        if (conn == null) {
+            System.out.println("Koneksi ke database gagal!");
+            return;
         }
+
+        String sql = "SELECT * FROM harga";
+        ps = conn.prepareStatement(sql);
+        rs = ps.executeQuery();
+
+        // Format angka ke mata uang Indonesia
+        NumberFormat kursIndo = NumberFormat.getIntegerInstance(new Locale("id", "ID"));
+
+        while (rs.next()) {
+            String menu = rs.getString("menu");
+            String itm1 = rs.getString("item1");
+            String itm2 = rs.getString("item2");
+            String itm3 = rs.getString("item3");
+            String itm4 = rs.getString("item4");
+            double totalHarga = rs.getDouble("total_harga");
+            double hargaJual = rs.getDouble("harga_jual");
+
+            Object[] rowData = {menu, itm1, itm2, itm3, itm4, kursIndo.format(totalHarga), kursIndo.format(hargaJual)};
+            model.addRow(rowData);
+        }
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(null, "Gagal mengambil data: " + e.getMessage());
     }
+}
+
     
     private void reset(){
         txt_menu.setText("");
@@ -75,6 +86,20 @@ public class HargaJual extends javax.swing.JFrame {
             DecimalFormat dcf = new DecimalFormat("#,###,###");
             txt_hargajual.setText(dcf.format(formatRP));
         }
+    }
+    
+    private void hitungTotalHarga(){
+        double totalHarga, harga1, harga2, harga3, harga4;
+        harga1 = Double.parseDouble(harga_itm1.getText());
+        if(harga_itm2.getText().trim().equals("")) harga2=0;
+        else harga2 = Double.parseDouble(harga_itm2.getText().trim());
+        if(harga_itm3.getText().trim().equals("")) harga3=0;
+        else harga3 = Double.parseDouble(harga_itm3.getText().trim());
+        if(harga_itm4.getText().trim().equals("")) harga4=0;
+        else harga4 = Double.parseDouble(harga_itm4.getText().trim());
+        
+        totalHarga = harga1 + harga2 + harga3 + harga4;
+        txt_totalbiaya.setText(String.valueOf(totalHarga));
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -138,16 +163,16 @@ public class HargaJual extends javax.swing.JFrame {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(88, 88, 88)
+                .addGap(188, 188, 188)
                 .addComponent(jLabel1)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(27, 27, 27)
+                .addGap(26, 26, 26)
                 .addComponent(jLabel1)
-                .addContainerGap(30, Short.MAX_VALUE))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
 
         jPanel3.setBackground(new java.awt.Color(163, 133, 99));
@@ -227,6 +252,11 @@ public class HargaJual extends javax.swing.JFrame {
                 txt_totalbiayaActionPerformed(evt);
             }
         });
+        txt_totalbiaya.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txt_totalbiayaKeyTyped(evt);
+            }
+        });
 
         jLabel7.setFont(new java.awt.Font("Segoe UI Semilight", 1, 14)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(255, 255, 255));
@@ -249,7 +279,7 @@ public class HargaJual extends javax.swing.JFrame {
         jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel8.setText("Harga Jual");
 
-        btn_hapus.setText("Hapus");
+        btn_hapus.setText("hapus");
         btn_hapus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btn_hapusActionPerformed(evt);
@@ -274,18 +304,38 @@ public class HargaJual extends javax.swing.JFrame {
         harga_itm1.setBackground(new java.awt.Color(255, 204, 0));
         harga_itm1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         harga_itm1.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        harga_itm1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                harga_itm1KeyReleased(evt);
+            }
+        });
 
         harga_itm2.setBackground(new java.awt.Color(255, 204, 0));
         harga_itm2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         harga_itm2.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        harga_itm2.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                harga_itm2KeyReleased(evt);
+            }
+        });
 
         harga_itm3.setBackground(new java.awt.Color(255, 204, 0));
         harga_itm3.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         harga_itm3.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        harga_itm3.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                harga_itm3KeyReleased(evt);
+            }
+        });
 
         harga_itm4.setBackground(new java.awt.Color(255, 204, 0));
         harga_itm4.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         harga_itm4.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        harga_itm4.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                harga_itm4KeyReleased(evt);
+            }
+        });
 
         jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel9.setForeground(new java.awt.Color(255, 255, 255));
@@ -342,28 +392,28 @@ public class HargaJual extends javax.swing.JFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(29, 29, 29)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(txt_hargajual, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(btn_hapus, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btn_reset, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(txt_hargajual, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btn_simpan, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(jLabel9)
-                                .addComponent(jLabel10))
-                            .addComponent(jLabel11)
-                            .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.TRAILING))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(harga_itm1)
-                            .addComponent(harga_itm2)
-                            .addComponent(harga_itm3)
-                            .addComponent(harga_itm4, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE))))
+                                .addComponent(btn_reset, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jLabel9)
+                        .addComponent(jLabel10))
+                    .addComponent(jLabel11)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(harga_itm1)
+                    .addComponent(harga_itm2)
+                    .addComponent(harga_itm3)
+                    .addComponent(harga_itm4, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addComponent(btn_simpan, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(37, 37, 37)))
                 .addGap(267, 267, 267))
         );
         jPanel3Layout.setVerticalGroup(
@@ -407,7 +457,7 @@ public class HargaJual extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txt_hargajual, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_hapus)
                     .addComponent(btn_reset)
@@ -438,10 +488,10 @@ public class HargaJual extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 668, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 673, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(19, 19, 19)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 639, Short.MAX_VALUE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 644, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -476,6 +526,7 @@ public class HargaJual extends javax.swing.JFrame {
 
     private void txt_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_menuActionPerformed
         // TODO add your handling code here:
+        
     }//GEN-LAST:event_txt_menuActionPerformed
 
     private void txt_item1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_item1ActionPerformed
@@ -545,83 +596,67 @@ public class HargaJual extends javax.swing.JFrame {
         
         btn_simpan.setText("update");
         formatRupiah();
+        showData();
     }//GEN-LAST:event_tbl_jualMouseClicked
 
     private void btn_simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_simpanActionPerformed
-        if(txt_menu.getText().equals("")||txt_hargajual.getText().equals("")){
-            JOptionPane.showMessageDialog(null, "Data yang dimasukkan belum lengkap", "Validasi",
+                                         
+    // Validasi input
+    if (txt_menu.getText().isEmpty() || txt_hargajual.getText().isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Data yang dimasukkan belum lengkap", "Validasi",
+                JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    try {
+        // Mendapatkan data dari form
+        int selectedRow = tbl_jual.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(null, "Tidak ada baris yang dipilih", "Validasi",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
-        try {
-            st = conn.createStatement();
-            if(btn_simpan.getText()== "Simpan"){
-                String find = "SELECT * FROM harga WHERE menu='" + txt_menu.getText() +
-                        "' ";
-                rs = st.executeQuery(find);
-                if(rs.next()){
-                    JOptionPane.showMessageDialog(null, "Menu sudah ada, masukkan menu lain", "Validasi",
-                    JOptionPane.WARNING_MESSAGE);
-                }else{
-                    String menu = txt_menu.getText();
-                    String itm1 = txt_item1.getText();
-                    String itm2 = txt_item2.getText();
-                    String itm3 = txt_item3.getText();
-                    String itm4 = txt_item4.getText();
-                    String totalbiaya = txt_totalbiaya.getText();
-                    String hargajual = txt_hargajual.getText();
-                    String ReplaceHarga = hargajual.replaceAll(",", "");
-                    
-                    String sql = "INSERT INTO harga (menu,item1,item2,item3,item4,total_harga,"
-                            + "harga_jual)VALUES (?,?,?,?,?,?,?)";
-                    ps = conn.prepareStatement(sql);
-                    ps.setString(1, menu);
-                    ps.setString(2, itm1);
-                    ps.setString(3, itm2);
-                    ps.setString(4, itm3);
-                    ps.setString(5, itm4);
-                    ps.setString(6, totalbiaya);
-                    ps.setString(7, ReplaceHarga);
-                    
-                    ps.executeUpdate();
-                    JOptionPane.showMessageDialog(null, "Menu berhasil update!", "Input Menu",
-                    JOptionPane.INFORMATION_MESSAGE);
-                    showData();
-                    reset();
-                }
-            } else {
-                int selectedRow = tbl_jual.getSelectedRow();
-                String id = tbl_jual.getValueAt(selectedRow, 0).toString();
-                String menu = txt_menu.getText();
-                String itm1 = txt_item1.getText();
-                String itm2 = txt_item2.getText();
-                String itm3 = txt_item3.getText();
-                String itm4 = txt_item4.getText();
-                String totalbiaya = txt_totalbiaya.getText(); 
-                String hargajual = txt_hargajual.getText();
-                String ReplaceHarga = hargajual.replaceAll(",", "");
-                
-                String sql = "UPDATE harga SET item1=?, item2=?, item3=?,"
-                        + "item4=?, total_harga=?, harga_jual=? WHERE menu=?";
-                ps = conn.prepareStatement(sql);
-                ps.setString(1, menu);
-                ps.setString(2, itm1);
-                ps.setString(3, itm2);
-                ps.setString(4, itm3);
-                ps.setString(5, itm4);
-                ps.setString(6, totalbiaya);
-                ps.setString(7, ReplaceHarga);
-                ps.setString(8, id);
-                
-                ps.executeUpdate();
-                JOptionPane.showMessageDialog(null, "Data berhasil di Update", "input data",
+
+        String id = tbl_jual.getValueAt(selectedRow, 0).toString();
+        String menu = txt_menu.getText();
+        String itm1 = txt_item1.getText();
+        String itm2 = txt_item2.getText();
+        String itm3 = txt_item3.getText();
+        String itm4 = txt_item4.getText();
+        String totalbiaya = txt_totalbiaya.getText(); 
+        String hargajual = txt_hargajual.getText();
+        txt_totalbiaya.setEditable(false);
+        String ReplaceHarga = hargajual.replaceAll(",", "");
+
+        // Query SQL untuk update data
+        String sql = "UPDATE harga SET item1=?, item2=?, item3=?, item4=?, total_harga=?, harga_jual=? WHERE menu=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, itm1);
+            ps.setString(2, itm2);
+            ps.setString(3, itm3);
+            ps.setString(4, itm4);
+            ps.setString(5, totalbiaya);
+            ps.setString(6, ReplaceHarga);
+            ps.setString(7, menu);
+
+            int rowsUpdated = ps.executeUpdate();
+            if (rowsUpdated > 0) {
+                JOptionPane.showMessageDialog(null, "Data berhasil di Update", "Input Data",
                         JOptionPane.INFORMATION_MESSAGE);
                 showData();
                 reset();
+            } else {
+                JOptionPane.showMessageDialog(null, "Data gagal di Update", "Input Data",
+                        JOptionPane.ERROR_MESSAGE);
             }
-        } catch (Exception e){
-            
         }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat mengupdate data: " + e.getMessage(), "Error",
+                JOptionPane.ERROR_MESSAGE);
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(null, "Terjadi kesalahan: " + e.getMessage(), "Error",
+                JOptionPane.ERROR_MESSAGE);
+    }
     }//GEN-LAST:event_btn_simpanActionPerformed
 
     private void btn_resetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_resetActionPerformed
@@ -629,29 +664,97 @@ public class HargaJual extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_resetActionPerformed
 
     private void btn_menuMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btn_menuMouseClicked
-        try {
-        String query = "SELECT menu FROM harga";
+
+    try {
+        // Query untuk mengambil data menu
+        String query = "SELECT menu, item1, item2, item3, item4, total_harga, harga_jual FROM harga";
         ps = conn.prepareStatement(query);
         rs = ps.executeQuery();
 
+        // Membuat model tabel
         DefaultTableModel model = new DefaultTableModel();
-        model.addColumn("Nama Menu");
+        model.addColumn("Menu");
+        model.addColumn("Item 1");
+        model.addColumn("Item 2");
+        model.addColumn("Item 3");
+        model.addColumn("Item 4");
+        model.addColumn("Total Biaya");
+        model.addColumn("Harga Jual");
+
+        // Mengisi model tabel dengan data dari ResultSet
         while (rs.next()) {
-            model.addRow(new Object[]{rs.getString("menu")});
+            model.addRow(new Object[]{
+                rs.getString("menu"),
+                rs.getString("item1"),
+                rs.getString("item2"),
+                rs.getString("item3"),
+                rs.getString("item4"),
+                rs.getString("total_harga"),
+                rs.getString("harga_jual")
+            });
         }
 
+        // Membuat tabel dan scroll pane
         JTable table = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
 
-        JOptionPane.showMessageDialog(null, scrollPane, "Pilih Menu", JOptionPane.PLAIN_MESSAGE);
-        int row = table.getSelectedRow();
-                if (row != -1) {
-                    String selectedMenu = table.getValueAt(row, 1).toString(); 
-                    txt_menu.setText(selectedMenu);
-                }
+        // Variabel untuk menyimpan nilai yang dipilih
+        final String[] selectedMenu = {null};
 
+        // Menambahkan listener untuk menangani klik pada tabel
+        table.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                int row = table.getSelectedRow();
+                if (row != -1) {
+                    // Ambil nilai dari kolom yang sesuai (kolom 0: Menu)
+                    selectedMenu[0] = table.getValueAt(row, 0).toString();
+                }
+            }
+        });
+
+        // Menampilkan dialog dengan tabel
+        int option = JOptionPane.showOptionDialog(
+            null, scrollPane, "Pilih Menu",
+            JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
+            null, new Object[]{"OK"}, "OK"
+        );
+
+        // Jika pengguna memilih "OK" dan ada baris yang dipilih
+        if (option == 0 && selectedMenu[0] != null) {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow != -1) {
+                // Ambil nilai dari kolom yang sesuai untuk setiap field
+                String menu = table.getValueAt(selectedRow, 0).toString(); // Kolom 0: Menu
+                String item1 = table.getValueAt(selectedRow, 1).toString(); // Kolom 1: Item 1
+                String item2 = table.getValueAt(selectedRow, 2).toString(); // Kolom 2: Item 2
+                String item3 = table.getValueAt(selectedRow, 3).toString(); // Kolom 3: Item 3
+                String item4 = table.getValueAt(selectedRow, 4).toString(); // Kolom 4: Item 4
+                String totalBiaya = table.getValueAt(selectedRow, 5).toString(); // Kolom 5: Total Biaya
+                String hargaJual = table.getValueAt(selectedRow, 6).toString(); // Kolom 6: Harga Jual
+
+                // Isi nilai ke dalam field yang sesuai
+                txt_menu.setText(menu);
+                txt_item1.setText(item1);
+                txt_item2.setText(item2);
+                txt_item3.setText(item3);
+                txt_item4.setText(item4);
+                txt_totalbiaya.setText(totalBiaya);
+                txt_hargajual.setText(hargaJual);
+            } else {
+                JOptionPane.showMessageDialog(null, "Tidak ada baris yang dipilih.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            }
+        }
     } catch (Exception e) {
-        JOptionPane.showMessageDialog(null, "Gagal mengambil data: " + e.getMessage());
+        JOptionPane.showMessageDialog(null, "Gagal mengambil data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    } finally {
+        // Menutup ResultSet dan PreparedStatement
+        try {
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Gagal menutup resource: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
     }//GEN-LAST:event_btn_menuMouseClicked
 
@@ -660,6 +763,31 @@ public class HargaJual extends javax.swing.JFrame {
         ktc.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_formWindowClosing
+
+    private void harga_itm1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga_itm1KeyReleased
+        // TODO add your handling code here:
+        hitungTotalHarga();
+    }//GEN-LAST:event_harga_itm1KeyReleased
+
+    private void harga_itm2KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga_itm2KeyReleased
+        // TODO add your handling code here:
+        hitungTotalHarga();
+    }//GEN-LAST:event_harga_itm2KeyReleased
+
+    private void harga_itm3KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga_itm3KeyReleased
+        // TODO add your handling code here:
+        hitungTotalHarga();
+    }//GEN-LAST:event_harga_itm3KeyReleased
+
+    private void harga_itm4KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga_itm4KeyReleased
+        // TODO add your handling code here:
+        hitungTotalHarga();
+    }//GEN-LAST:event_harga_itm4KeyReleased
+
+    private void txt_totalbiayaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_totalbiayaKeyTyped
+        // TODO add your handling code here:
+        txt_totalbiaya.setEditable(false);
+    }//GEN-LAST:event_txt_totalbiayaKeyTyped
 
     /**
      * @param args the command line arguments
