@@ -39,7 +39,7 @@ Jika ingin berkontribusi dalam pengembangan aplikasi ini, harap ikuti aturan ber
 
 ## Tim Pengembang
 - Fahri (Backend)
-- Dinda (FUll-stack)
+- Dinda (Full-stack)
 - Sabrina (Database)
 - Salsa (Frontend)
 - Santo (Frontend)
